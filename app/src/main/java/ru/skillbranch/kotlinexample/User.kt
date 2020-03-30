@@ -141,11 +141,19 @@ class User private constructor(
             fullName: String,
             email: String? = null,
             password: String? = null,
-            phone: String? = null
+            phone: String? = null,
+            meta: Map<String, Any>? = null,
+            passwordMeta: Pair<String, String>? = null
         ): User {
             val (firstName, lastName) = fullName.fullNameToPair()
 
             return when {
+                meta == mapOf("src" to "csv") -> {
+                    User(firstName, lastName, email, phone, meta).apply {
+                        passwordMeta?.let { salt = it.first }
+                        passwordMeta?.let { passwordHash = it.second }
+                    }
+                }
                 !phone.isNullOrBlank() -> User(firstName, lastName, phone)
                 !email.isNullOrBlank() && !password.isNullOrBlank() -> User(
                     firstName,
@@ -156,20 +164,20 @@ class User private constructor(
                 else -> throw IllegalArgumentException("Email or phone must be not null or blank")
             }
         }
-
-        private fun String.fullNameToPair(): Pair<String, String?> {
-            return this.split(" ")
-                .filter { it.isNotBlank() }
-                .run {
-                    when (size) {
-                        1 -> first() to null
-                        2 -> first() to last()
-                        else -> throw IllegalArgumentException(
-                            "Fullname must be contail only first name " +
-                                    "and last name, current split result ${this@fullNameToPair}"
-                        )
-                    }
-                }
-        }
     }
+}
+
+fun String.fullNameToPair(): Pair<String, String?> {
+    return this.split(" ")
+        .filter { it.isNotBlank() }
+        .run {
+            when (size) {
+                1 -> first() to null
+                2 -> first() to last()
+                else -> throw IllegalArgumentException(
+                    "Fullname must be contail only first name " +
+                            "and last name, current split result ${this@fullNameToPair}"
+                )
+            }
+        }
 }

@@ -20,15 +20,15 @@ object UserHolder {
         }
     }
 
-    fun registerUserByPhone(fullName: String, rawPhone: String) : User {
+    fun registerUserByPhone(fullName: String, rawPhone: String): User {
         val user = User.makeUser(fullName, phone = rawPhone)
         return when {
             !isValidPhone(user.login) -> throw IllegalArgumentException("Enter a valid phone number starting with a + and containing 11 digits")
-            map.filter {  it.key == rawPhone || it.value.login == user.login}.isEmpty() -> {
+            map.filter { it.key == rawPhone }.isEmpty() -> {
                 map[rawPhone] = user
                 user
             }
-            else -> throw IllegalArgumentException("A user with this email already exists")
+            else -> throw IllegalArgumentException("A user with this phone already exists")
         }
     }
 
@@ -41,8 +41,31 @@ object UserHolder {
 
     fun requestAccessCode(login: String) = map[login.trim()]?.changeAccessCode()
 
-
     private fun isValidPhone(phone: String) = phone.matches(Regex("""\+[\d]{11}"""))
+
+    private fun importUsers(list: List<String>): List<User> {
+        val result: MutableList<User> = mutableListOf()
+            list.forEach {
+                val parts = it.split(";")
+                val fullName = parts[0].trim()
+                var email: String? = parts[1].trim()
+                val (salt, passwordHash) = parts[2].trim().split(":")
+                var phone: String? = parts[3]
+                if (email.isNullOrBlank()) email = null
+                if (phone.isNullOrBlank()) phone = null
+                val importMeta = mapOf("src" to "csv")
+                val user = User.makeUser(
+                    fullName,
+                    email = email,
+                    phone = phone,
+                    meta = importMeta,
+                    passwordMeta = salt to passwordHash
+                )
+                map[user.login] = user
+                result.add(user)
+            }
+            return result
+    }
 
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)
     fun clearHolder() {
