@@ -12,7 +12,7 @@ object UserHolder {
     ): User {
         val user = User.makeUser(fullName, email = email, password = password)
         return when {
-            map.filter {  it.key.trim() == user.login.trim() }.isEmpty() -> {
+            map.filter { it.key.trim() == user.login.trim() }.isEmpty() -> {
                 map[user.login] = user
                 user
             }
@@ -24,7 +24,7 @@ object UserHolder {
         val user = User.makeUser(fullName, phone = rawPhone)
         return when {
             !isValidPhone(user.login) -> throw IllegalArgumentException("Enter a valid phone number starting with a + and containing 11 digits")
-            map.filter {  it.key.trim() == rawPhone.trim() }.isEmpty() -> {
+            map.filter {  it.key == rawPhone || it.value.login == user.login}.isEmpty() -> {
                 map[rawPhone] = user
                 user
             }
