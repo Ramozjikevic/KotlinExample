@@ -43,7 +43,7 @@ object UserHolder {
 
     private fun isValidPhone(phone: String) = phone.matches(Regex("""\+[\d]{11}"""))
 
-    private fun importUsers(list: List<String>): List<User> {
+    fun importUsers(list: List<String>): List<User> {
         val result: MutableList<User> = mutableListOf()
             list.forEach {
                 val parts = it.split(";")
