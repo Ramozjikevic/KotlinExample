@@ -1,8 +1,10 @@
 package ru.skillbranch.kotlinexample.extensions
 
 fun <T> Iterable<T>.dropLastUntil(predicate: (T) -> Boolean): List<String> {
-    val lastIndex = indexOfLast(predicate) + 1
+    val lastIndex = indexOfLast(predicate)
     val newList = toList().map { it.toString() }
-    if (lastIndex != -1) newList.dropLast(lastIndex)
-    return newList
+    return if (lastIndex != -1) {
+        val rightCroppedPart = newList.size - lastIndex
+        newList.dropLast(rightCroppedPart)
+    } else newList
 }
